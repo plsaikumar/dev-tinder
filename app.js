@@ -1,0 +1,6 @@
+console.log(globalThis)
+console.log(global)
+console.log(this)
+//console.log(window) 
+//console.log(self) 
+//console.log(frames) 
