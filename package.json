@@ -1,5 +1,17 @@
 {
+  "name": "dev-tinder",
+  "version": "1.0.0",
+  "description": "tinde for devs",
+  "main": "app.js",
   "dependencies": {
+    "express": "^4.21.2",
     "mongodb": "^6.14.0"
-  }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev" : "nodemon src/app.js",
+    "start": "node src/app.js"
+  },
+  "author": "Lakshman",
+  "license": "ISC"
 }
