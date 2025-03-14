@@ -1,47 +1,64 @@
 const express = require("express");
+const connectDB = require("../config/database");
 const app = express();
+const User = require("../models/user.js");
 
-const { adminAuth } = require("./utils.js");
+app.use(express.json());
 
-app.all("/admin", (req, res, next) => {
-  const token = "xyzas";
-  if (token === "xyz") {
-    next();
-  } else {
-    res.status(401).send("Not Authenticated");
+app.post("/signup", async (req, res) => {
+  const body = req.body;
+  const newUser = new User(body);
+
+  try {
+    await newUser.save();
+    res.send("User Data Saved Successfully");
+  } catch (err) {
+    res.status(400).send("Error while saving data", err);
   }
 });
 
-app.get("/admin/deleteAllData", adminAuth, (req, res) => {
-  res.send("Delete from DB");
+app.get("/user", async (req, res) => {
+  try {
+    const userInfo = await User.find({ emailId: req.body.emailId });
+    if (userInfo.length === 0) {
+      res.status(404).send("User not found");
+    } else {
+      res.send(userInfo);
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
 });
 
-app.get("/admin/getAllData", adminAuth, (req, res) => {
-  res.send("Get Data from DB");
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.send(users);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
 });
 
-app.get("/", (req, res) => {
-  res.send("Intial route from server");
-});
-app.get("/u(se)?r", (req, res) => {
-  res.send("Data posted successfully");
-});
-app.post("/us+er", (req, res) => {
-  res.send("Data posted successfully");
+app.get("/oneUser", async (req, res) => {
+  try {
+    const users = await User.findOne({ emailId: "lakshman@xyz.com" });
+    if (!users) {
+      res.status(404).send("User not found");
+    } else {
+      res.send(users);
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
 });
 
-app.post("/us*er", (req, res) => {
-  res.send("Data posted successfully");
-});
-app.get("/u(se)?r", (req, res) => {
-  res.send("Data posted successfully");
-});
-app.get("/u(se)+r", (req, res) => {
-  res.send("Data posted successfully");
-});
-app.get("/u(se)*r", (req, res) => {
-  res.send("Data posted successfully");
-});
-app.listen(3000, () => {
-  console.log("Success");
-});
+connectDB()
+  .then(() => {
+    console.log("Database Connected SuccesFully");
+    app.listen(3000, () => {
+      console.log("Listen to 3000 port");
+    });
+  })
+  .catch((err) => {
+    console.log("Not Connected to Database  SuccesFully", err);
+  });
