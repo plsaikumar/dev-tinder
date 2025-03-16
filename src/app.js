@@ -13,7 +13,7 @@ app.post("/signup", async (req, res) => {
     await newUser.save();
     res.send("User Data Saved Successfully");
   } catch (err) {
-    res.status(400).send("Error while saving data"+ err);
+    res.status(400).send("Error while saving data" + err);
   }
 });
 
@@ -73,6 +73,33 @@ app.patch("/user", async (req, res) => {
   }
 });
 
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const userInfo = req.body;
+  try {
+    const ALLOWED_CHANGES = [
+      "age",
+      "firstName",
+      "lastName",
+      "password",
+      "gender",
+      "about",
+      "skills",
+    ];
+    const isUpdateAllowed = Object.keys(userInfo).every((k) =>
+      ALLOWED_CHANGES.includes(k)
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Update Not Allowed");
+    }
+
+    const user = await User.findByIdAndUpdate(userId, userInfo);
+    res.send("User Data Updated Successfully");
+  } catch (err) {
+    res.status(400).send("Something went wrong" + err);
+  }
+});
+
 app.patch("/userByEmail", async (req, res) => {
   const emailId = req.body.emailId;
   const userInfo = req.body;
@@ -84,12 +111,12 @@ app.patch("/userByEmail", async (req, res) => {
       userInfo,
       {
         returnDocument: "before",
-        runValidators: true
+        runValidators: true,
       }
     );
     res.send("User Data Updated Successfully");
   } catch (err) {
-    res.status(400).send("Something went wrong"+ err);
+    res.status(400).send("Something went wrong" + err);
   }
 });
 
