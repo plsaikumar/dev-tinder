@@ -4,6 +4,7 @@
   "description": "tinde for devs",
   "main": "app.js",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "express": "^4.21.2",
     "mongodb": "^6.14.0",
     "mongoose": "^8.12.1",

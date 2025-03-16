@@ -1,19 +1,51 @@
 const express = require("express");
-const connectDB = require("../config/database");
 const app = express();
-const User = require("../models/user.js");
+const connectDB = require("./config/database.js");
+const User = require("./models/user.js");
+const { validateSignUpAPI } = require("./utils/validation.js");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   const body = req.body;
-  const newUser = new User(body);
+
+  const { password } = req.body;
 
   try {
+    validateSignUpAPI(body);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(hashedPassword, "hashedPassword");
+    const newUser = new User({
+      ...body,
+      password: hashedPassword,
+    });
+
     await newUser.save();
     res.send("User Data Saved Successfully");
   } catch (err) {
     res.status(400).send("Error while saving data" + err);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+
+  try {
+    const user = await User.findOne({ emailId: emailId });
+
+    if (!validator.isEmail(emailId) || !user) {
+      throw new Error("User not exist in the DB");
+    }
+    const isValidPassWord = await bcrypt.compare(password, user.password);
+    if (isValidPassWord) {
+      res.send("Login Successfully");
+    } else {
+      throw new Error("Password not match");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR :" + err.message);
   }
 });
 
@@ -41,7 +73,7 @@ app.get("/feed", async (req, res) => {
 
 app.get("/oneUser", async (req, res) => {
   try {
-    const users = await User.findOne({ emailId: "lak@gmail.com" });
+    const users = await User.findOne({ emailId: "saketh@gmail.com" });
     if (!users) {
       res.status(404).send("User not found");
     } else {
