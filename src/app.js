@@ -13,7 +13,7 @@ app.post("/signup", async (req, res) => {
     await newUser.save();
     res.send("User Data Saved Successfully");
   } catch (err) {
-    res.status(400).send("Error while saving data", err);
+    res.status(400).send("Error while saving data"+ err);
   }
 });
 
@@ -84,11 +84,12 @@ app.patch("/userByEmail", async (req, res) => {
       userInfo,
       {
         returnDocument: "before",
+        runValidators: true
       }
     );
     res.send("User Data Updated Successfully");
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("Something went wrong"+ err);
   }
 });
 
