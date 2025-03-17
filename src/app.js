@@ -5,8 +5,11 @@ const User = require("./models/user.js");
 const { validateSignUpAPI } = require("./utils/validation.js");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   const body = req.body;
@@ -36,16 +39,37 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ emailId: emailId });
 
     if (!validator.isEmail(emailId) || !user) {
-      throw new Error("User not exist in the DB");
+      throw new Error("Invalid Credentials");
     }
     const isValidPassWord = await bcrypt.compare(password, user.password);
     if (isValidPassWord) {
+      const token = await jwt.sign({ _id: user._id }, "DEV@TINDER");
+      res.cookie("access_token", token);
       res.send("Login Successfully");
     } else {
-      throw new Error("Password not match");
+      throw new Error("Invalid Credentials");
     }
   } catch (err) {
     res.status(400).send("ERROR :" + err.message);
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const cookieInfo = req.cookies;
+    const accessToken = cookieInfo.access_token;
+    if (!accessToken) {
+      throw new Error("Authentication Failed");
+    }
+    const decodedToken = await jwt.verify(accessToken, "DEV@TINDER");
+    const user = await User.findOne({ _id: decodedToken._id });
+    if (user) {
+      res.send(user);
+    } else {
+      throw new Error("Authentication Failed");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR :" + err);
   }
 });
 
