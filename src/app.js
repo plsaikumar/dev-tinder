@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const validator = require("validator");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth.js");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -54,20 +55,10 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const cookieInfo = req.cookies;
-    const accessToken = cookieInfo.access_token;
-    if (!accessToken) {
-      throw new Error("Authentication Failed");
-    }
-    const decodedToken = await jwt.verify(accessToken, "DEV@TINDER");
-    const user = await User.findOne({ _id: decodedToken._id });
-    if (user) {
-      res.send(user);
-    } else {
-      throw new Error("Authentication Failed");
-    }
+    const user = req.user;
+    res.send(user);
   } catch (err) {
     res.status(400).send("ERROR :" + err);
   }
