@@ -20,7 +20,6 @@ app.post("/signup", async (req, res) => {
   try {
     validateSignUpAPI(body);
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(hashedPassword, "hashedPassword");
     const newUser = new User({
       ...body,
       password: hashedPassword,
@@ -42,9 +41,9 @@ app.post("/login", async (req, res) => {
     if (!validator.isEmail(emailId) || !user) {
       throw new Error("Invalid Credentials");
     }
-    const isValidPassWord = await bcrypt.compare(password, user.password);
+    const isValidPassWord = await user.validatePassword(password);
     if (isValidPassWord) {
-      const token = await jwt.sign({ _id: user._id }, "DEV@TINDER");
+      const token = await user.getJWT();
       res.cookie("access_token", token);
       res.send("Login Successfully");
     } else {
