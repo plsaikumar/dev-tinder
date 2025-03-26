@@ -4,9 +4,7 @@ const { validateSignUpAPI } = require("../utils/validation");
 const User = require("../models/user.js");
 const validator = require("validator");
 
-
 const authRouter = express.Router();
-
 
 authRouter.post("/signup", async (req, res) => {
   const body = req.body;
@@ -56,6 +54,11 @@ authRouter.delete("/user", async (req, res) => {
   } catch (err) {
     res.status(400).send("Something went wrong");
   }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  res.cookie("access_token", null);
+  res.status(200).send("Logout Successfull!");
 });
 
 module.exports = authRouter;
