@@ -22,6 +22,12 @@ requestRouter.post(
           message: "Invalid status type " + status,
         });
       }
+ 
+      const isToUserValidUser = await User.findById(toUserId);
+
+      if (!isToUserValidUser) {
+        throw Error("User not found!");
+      }
 
       const isUserIdExist = await ConnectionRequest.findOne({
         $or: [
@@ -40,11 +46,6 @@ requestRouter.post(
         throw Error("User Connection already exist");
       }
 
-      const isToUserValidUser = await User.findById(toUserId);
-
-      if (!isToUserValidUser) {
-        throw Error("User not found!");
-      }
 
       const newConnection = new ConnectionRequest({
         fromUserId,
