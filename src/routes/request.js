@@ -22,7 +22,7 @@ requestRouter.post(
           message: "Invalid status type " + status,
         });
       }
- 
+
       const isToUserValidUser = await User.findById(toUserId);
 
       if (!isToUserValidUser) {
@@ -46,7 +46,6 @@ requestRouter.post(
         throw Error("User Connection already exist");
       }
 
-
       const newConnection = new ConnectionRequest({
         fromUserId,
         toUserId,
@@ -66,6 +65,46 @@ requestRouter.post(
       });
     } catch (err) {
       res.status(400).send("ERROR :" + err);
+    }
+  }
+);
+
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user._id;
+      const requestId = req.params.requestId;
+      const status = req.params.status;
+
+      const allowedStatus = ["accepted", "rejected"];
+
+      if (!allowedStatus.includes(status)) {
+        res.status(400).json({
+          message: "Invalid Status Type",
+        });
+      }
+
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser,
+        status: "interested",
+      });
+
+      if (!connectionRequest) {
+        res.status(400).json({
+          message: "Connection Request not Found",
+        });
+      }
+
+      connectionRequest.status = status;
+
+      const data = await connectionRequest.save();
+
+      res.status(200).json(data);
+    } catch (err) {
+      res.status(400).send("ERROR " + err);
     }
   }
 );
